@@ -1,0 +1,23 @@
+#Telegram Bot Configuration
+python-telegram-bot >= 22.3
+
+# Environment Variables
+python-dotenv >= 1.1.1
+
+# SQL Alchemy
+SQLAlchemy >= 2.0.43
+
+# FastAPI
+fastapi >= 0.116.1
+
+# Pydantic 
+pydantic >= 2.11
+
+# Uvicorn 
+uvicorn >= 0.35.0
+
+# PostgreSQL Driver
+psycopg2-binary
+
+# HTTP Client 
+httpx >= 0.28.1

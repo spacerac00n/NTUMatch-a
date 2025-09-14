@@ -1,0 +1,23 @@
+# Creates a private network where 2 service (front & backend) can talk to each other
+
+version: "3.9"
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: backend
+    env_file: .env
+    ports:
+      - "8000:8000"         # expose FastAPI locally
+    restart: always
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: frontend
+    env_file: .env
+    depends_on:
+      - backend
+    restart: always
