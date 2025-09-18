@@ -4,7 +4,7 @@ from api_client import NTUMatchAPI
 from commands.editcommand import edit
 
 # Conversation States
-NAME, EMAIL, AGE, GENDER, HOBBY, LOCATION, DESCRIPTION = range(7)
+PHOTO, NAME, EMAIL, AGE, GENDER, HOBBY, LOCATION, DESCRIPTION = range(8)
 
 api_client = NTUMatchAPI()
 
@@ -17,10 +17,9 @@ async def start (update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         keyboard = [["/edit", "/delete"], ["/match"]]
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
         await update.message.reply_text("Choose your next action:", reply_markup=reply_markup)
-        
     else:
-        await update.message.reply_text("Hi, there !\nIt seems you're new here. Please register to continue.")
-        await update.message.reply_text("Please enter your NTU Email Address: ")   
+        await update.message.reply_text("Hi, there !\nIt seems that you're new here. Please register to continue.")
+        await update.message.reply_text("Please enter your NTU Email Address: ")
         return EMAIL
 
 async def get_email(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -35,6 +34,15 @@ async def get_email(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         return EMAIL
     
     context.user_data['email'] = email
+
+    await update.message.reply_text("Great! Please select a photo for your profile:")
+    return PHOTO
+
+async def get_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Get user's profile photo"""  
+    photo_file = update.message.photo[-1]
+    file_id = photo_file.file_id
+    context.user_data['photo_file_id'] = file_id
 
     await update.message.reply_text("Great! Now, what's your full name?")
     return NAME
@@ -103,7 +111,8 @@ async def get_description (update: Update, context: ContextTypes.DEFAULT_TYPE) -
         'age': context.user_data['age'],
         'gender': context.user_data['gender'],
         'hobby': context.user_data['hobby'],
-        'description': context.user_data['description']
+        'description': context.user_data['description'],
+        'picture_id': context.user_data['photo_file_id']
     }
     
     # Send to API
@@ -136,11 +145,12 @@ start_handler = ConversationHandler(
     entry_points=[CommandHandler("start", start)],
     states={
         EMAIL: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_email)],
+        PHOTO: [MessageHandler(filters.PHOTO & ~filters.COMMAND, get_photo)],
         NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_name)],
         AGE: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_age)],
         GENDER: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_gender)],
         HOBBY: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_hobby)],
-        DESCRIPTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_description)],
+        DESCRIPTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_description)]
     },
     fallbacks=[CommandHandler("cancel", cancel_registration)],
 )

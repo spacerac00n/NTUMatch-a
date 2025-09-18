@@ -5,6 +5,7 @@ import os
 from commands.startcommand import start_handler
 from commands.editcommand import edit_handler
 from commands.deletecommand import delete_handler
+from commands.showcommand import show_handler
 
 import logging
 
@@ -33,6 +34,7 @@ def main() -> None:
     app.add_handler(start_handler)
     app.add_handler(edit_handler)
     app.add_handler(delete_handler)
+    app.add_handler(show_handler)
 
     # Run the bot until the user presses Ctrl-C
     app.run_polling(allowed_updates=Update.ALL_TYPES)

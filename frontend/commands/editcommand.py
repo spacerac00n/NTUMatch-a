@@ -3,7 +3,7 @@ from telegram.ext import ContextTypes, ConversationHandler, MessageHandler, Comm
 from api_client import NTUMatchAPI
 
 # States for conversation handlers
-EDIT_SELECTION, EDIT_AGE, EDIT_HOBBY, EDIT_DESCRIPTION = range(4)
+EDIT_SELECTION, EDIT_AGE, EDIT_HOBBY, EDIT_DESCRIPTION, EDIT_PICTURE = range(5)
 
 api_client = NTUMatchAPI()
 
@@ -17,7 +17,7 @@ async def edit (update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         await update.message.reply_text("You are not registered yet. Please use /start to register.")
         return ConversationHandler.END
 
-    reply_keyboard = [["Edit Age", "Edit Hobby"], ["Edit Description", "Cancel"]]
+    reply_keyboard = [["Edit Age", "Edit Hobby"], ["Edit Description", "Edit Picture"], ["Cancel"]]
 
     await update.message.reply_text(
         "What would you like to edit?",
@@ -39,6 +39,9 @@ async def edit_selection(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     elif selection == "Edit Description":
         await update.message.reply_text("Please enter your new description:", reply_markup=ReplyKeyboardRemove())
         return EDIT_DESCRIPTION
+    elif selection == "Edit Picture":
+        await update.message.reply_text("Please send your new profile picture:", reply_markup=ReplyKeyboardRemove())
+        return EDIT_PICTURE
     elif selection == "Cancel":
         await update.message.reply_text("Edit cancelled.", reply_markup=ReplyKeyboardRemove())
         return ConversationHandler.END
@@ -99,6 +102,26 @@ async def edit_description (update: Update, context: ContextTypes.DEFAULT_TYPE) 
         await update.message.reply_text("Failed to update description. Please try again later.")
     return await edit(update, context)
 
+async def edit_picture (update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Edit user's profile picture"""
+    if not update.message.photo:
+        await update.message.reply_text("Please send a valid photo.")
+        return EDIT_PICTURE
+
+    photo_file = update.message.photo[-1]
+
+    user_data = await api_client.get_user_by_telegram_username(update.effective_user.username)
+    user_data["picture_id"] = photo_file.file_id
+    result = await api_client.update_user_by_telegram_username(
+        telegram_username=update.effective_user.username,
+        user_data=user_data
+    )
+    if result:
+        await update.message.reply_text(f"Your profile picture has been updated. What else would you like to edit?", reply_markup=ReplyKeyboardRemove())
+    else:
+        await update.message.reply_text("Failed to update profile picture. Please try again later.")
+    return await edit(update, context)
+
 async def cancel_edit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Cancel the edit process"""
     await update.message.reply_text("Edit process cancelled.", reply_markup=ReplyKeyboardRemove())
@@ -111,6 +134,7 @@ edit_handler = ConversationHandler(
             EDIT_AGE: [MessageHandler(filters.TEXT & ~filters.COMMAND, edit_age)],
             EDIT_HOBBY: [MessageHandler(filters.TEXT & ~filters.COMMAND, edit_hobby)],
             EDIT_DESCRIPTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, edit_description)],
+            EDIT_PICTURE: [MessageHandler(filters.PHOTO, edit_picture)],
         },
         fallbacks=[CommandHandler("cancel", cancel_edit)],
     )

@@ -3,7 +3,6 @@ from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from pydantic import BaseModel, ConfigDict
-from typing import Optional
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 import os
@@ -24,7 +23,7 @@ password = os.getenv("DB_PASSWORD")
 # SQLAlchemy database URL
 #DATABASE_URL = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{dbname}"
 #DATABASE_URL = f"postgresql://postgres:{password}@db.ymknmrnlepsqpualasmj.supabase.co:5432/postgres"
-DATABASE_URL = f"postgresql://postgres.ymknmrnlepsqpualasmj:{password}@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
+DATABASE_URL = f"postgresql+psycopg2://postgres.ymknmrnlepsqpualasmj:{password}@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
 
 
 # Create SQLAlchemy engine
@@ -40,14 +39,14 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
-    telegram_username = Column(String, index=True, nullable=False)
+    telegram_username = Column(String, index=True, nullable=False, unique=True, primary_key=True)
     email = Column(String, unique=True, index=True, nullable=False)
     name = Column(String, index=True, nullable=False)
     age = Column(Integer, index=True, nullable=False)
     gender = Column(String, index=True, nullable=False)
     hobby = Column(String, index=True, nullable=True)
     description = Column(String, index=True, nullable=True)
+    picture_id = Column(String, index=True, nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
 
@@ -63,15 +62,16 @@ class UserCreate(BaseModel):
     gender: str
     hobby: str
     description: str
+    picture_id: str
 
 class UserResponse(BaseModel):
-    id: int
     telegram_username: str
     email: str
     name: str
     age: int
     gender: str
     hobby: str
+    picture_id: str
     description: str
     is_active: bool
     created_at: datetime
