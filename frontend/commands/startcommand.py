@@ -14,7 +14,7 @@ async def start (update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user = await api_client.get_user_by_telegram_username(telegram_username)
     if user:
         await update.message.reply_text(f"Glad to see you back, {user['name']} !")
-        keyboard = [["/edit", "/delete"], ["/match"]]
+        keyboard = [["/edit", "/delete"], ["/match", "/mymatches"]]
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
         await update.message.reply_text("Choose your next action:", reply_markup=reply_markup)
     else:

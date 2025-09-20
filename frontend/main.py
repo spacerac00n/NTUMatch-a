@@ -6,6 +6,13 @@ from commands.startcommand import start_handler
 from commands.editcommand import edit_handler
 from commands.deletecommand import delete_handler
 from commands.showcommand import show_handler
+from commands.matchcommand import (
+    dislike_callback_handler,
+    like_callback_handler,
+    match_handler,
+    next_callback_handler,
+)
+from commands.mymatchescommand import mymatches_handler
 
 import logging
 
@@ -35,6 +42,11 @@ def main() -> None:
     app.add_handler(edit_handler)
     app.add_handler(delete_handler)
     app.add_handler(show_handler)
+    app.add_handler(match_handler)
+    app.add_handler(mymatches_handler)
+    app.add_handler(like_callback_handler)
+    app.add_handler(dislike_callback_handler)
+    app.add_handler(next_callback_handler)
 
     # Run the bot until the user presses Ctrl-C
     app.run_polling(allowed_updates=Update.ALL_TYPES)
